@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Car Form</title>
+    
+    
+    
+</head>
+<body>
+    <h1>Add a New Car</h1>
+    <form id="carForm" action="/api/cars" method="post">
+        <label for="carId">Car ID:</label>
+        <input type="number" id="carId" name="carId" required>
+
+        <label for="model">Model:</label>
+        <input type="text" id="model" name="model" required>
+
+        <label for="price">Price:</label>
+        <input type="number" id="price" name="price" required>
+
+        <label for="color">Color:</label>
+        <input type="text" id="color" name="color" required>
+
+        <input type="submit" value="Submit">
+    </form>
+    
+    
+    <h1>Delete a Car</h1>
+    <form id="deleteForm" action="/api/cars" method="delete">
+        <label for="carIdToDelete">Enter Car ID to Delete:</label>
+        <input type="number" id="carIdToDelete" name="carIdToDelete" required>
+        <button id="deleteButton" type="button">Delete Car</button>
+    </form>
+    
+    
+    
+     <h1>All Cars Data</h1>
+    <table id="carTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Model</th>
+                <th>Price</th>
+                <th>Color</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be populated dynamically here -->
+        </tbody>
+    </table>
+    
+    <script>
+    document.getElementById("carForm").addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevent form submission to handle it manually
+
+        // Client-side validation
+        let carId = document.getElementById("carId").value;
+        let model = document.getElementById("model").value;
+        let price = document.getElementById("price").value;
+        let color = document.getElementById("color").value;
+
+        if (!carId || !model || !price || !color) {
+            alert("Please fill all the fields.");
+            return;
+        }
+
+        // Form data
+        let formData = {
+            carId: parseInt(carId),
+            model: model,
+            price: parseInt(price),
+            color: color,
+        };
+
+        // Send the form data to the Spring Boot backend
+        fetch('/api/cars', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert("Car added successfully!");
+            // Optionally, you can perform additional actions on success, like displaying a success message or redirecting the user.
+        })
+        .catch(error => {
+            alert("Failed to add car. Please try again later.");
+            // Handle error if necessary.
+        });
+    });
+    
+    
+    
+    document.getElementById("deleteButton").addEventListener("click", function (event) {
+    event.preventDefault(); // Prevent form submission to handle it manually
+
+    // Get the car ID to delete
+    let carIdToDelete = document.getElementById("carIdToDelete").value;
+
+    // Validate that the carIdToDelete is not empty
+    if (!carIdToDelete) {
+        alert("Please enter the Car ID to delete.");
+        return;
+    }
+
+    // Send the delete request to the Spring Boot backend
+    fetch(`/api/cars/${carIdToDelete}`, {
+        method: 'DELETE',
+    })
+    .then(response => {
+        if (response.ok) {
+            alert("Car deleted successfully!");
+            // Optionally, you can perform additional actions on success, like displaying a success message or updating the UI.
+        } else {
+            alert("Failed to delete the car. Car ID may not exist or there was an error.");
+        }
+    })
+    .catch(error => {
+        alert("Failed to delete the car. Please try again later.");
+        // Handle error if necessary.
+    });
+});
+
+// showAllCars.js
+fetch('/api/cars')
+    .then(response => response.json())
+    .then(data => {
+        const carTableBody = document.querySelector("#carTable tbody");
+
+        data.forEach(car => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${car.carId}</td>
+                <td>${car.model}</td>
+                <td>${car.price}</td>
+                <td>${car.color}</td>
+            `;
+            carTableBody.appendChild(row);
+        });
+    })
+    .catch(error => {
+        alert("Failed to fetch car data. Please try again later.");
+        // Handle error if necessary.
+    });
+
+
+</script>
+
+</body>
+</html>

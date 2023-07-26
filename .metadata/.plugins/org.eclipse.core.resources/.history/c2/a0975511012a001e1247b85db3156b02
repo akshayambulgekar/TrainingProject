@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cars Management</title>
+</head>
+<body>
+    <h1>Cars Management</h1>
+    
+    <form id="addCarForm">
+        <label for="id">id:</label>
+        <input type="text" id="id" name="id" required><br>
+        
+        <label for="model">Model:</label>
+        <input type="text" id="model" name="model" required><br>
+        
+        <label for="year">Color:</label>
+        <input type="text" id="color" name="color" required><br>
+        
+        <label for="price">Price:</label>
+        <input type="number" id="price" name="price" required><br>
+        
+        <input type="submit" value="Add Car">
+    </form>
+
+    <table id="carsTable">
+        <tr>
+            <th>id</th>
+            <th>Model</th>
+            <th>Color</th>
+            <th>Price</th>
+            <th>Action</th>
+        </tr>
+    </table>
+
+    <script>
+        // Function to fetch all cars from the API and populate the table
+        function fetchCars() {
+            fetch('/api/cars')
+                .then(response => response.json())
+                .then(cars => {
+                    const tableBody = document.querySelector('#carsTable');
+                    tableBody.innerHTML = '';
+
+                    cars.forEach(car => {
+                        const row = `
+                            <tr>
+                                <td>${car.carId}</td>
+                             
+                                <td>${car.model}</td>
+                                <td>${car.color}</td>
+                                <td>${car.price}</td>
+                                <td><button onclick="deleteCar(${car.id})">Delete</button></td>
+                            </tr>
+                        `;
+                        tableBody.insertAdjacentHTML('beforeend', row);
+                    });
+                });
+        }
+
+        // Function to add a new car
+        function addCar(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('id').value;
+            const model = document.getElementById('model').value;
+            const color = document.getElementById('color').value;
+            const price = document.getElementById('price').value;
+
+            const car = {
+                id: id,
+                model: model,
+                color: color,
+                price: price
+            };
+
+            fetch('/api/cars', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(car)
+            })
+            .then(response => response.json())
+            .then(newCar => {
+                console.log('New car added:', newCar);
+                fetchCars(); // Refresh the table after adding a new car
+            });
+        }
+
+        // Function to delete a car by its ID
+        function deleteCar(carId) {
+            fetch(`/api/cars/${carId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                fetchCars(); // Refresh the table after deleting a car
+            });
+        }
+
+        // Add event listener to the form submit event
+        document.getElementById('addCarForm').addEventListener('submit', addCar);
+
+        // Fetch cars when the page loads
+        fetchCars();
+    </script>
+</body>
+</html>

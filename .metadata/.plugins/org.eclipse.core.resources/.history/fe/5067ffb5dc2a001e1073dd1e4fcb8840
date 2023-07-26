@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Car Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        form {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        form input[type="text"],
+        form input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        form input[type="submit"],
+        button {
+            background-color: #007BFF;
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+    
+    
+</head>
+<body>
+    <h1>Add a New Car</h1>
+    <form id="carForm" action="/api/cars" method="post">
+        <label for="carId">Car ID:</label>
+        <input type="number" id="carId" name="carId" required>
+
+        <label for="model">Model:</label>
+        <input type="text" id="model" name="model" required>
+
+        <label for="price">Price:</label>
+        <input type="number" id="price" name="price" required>
+
+        <label for="color">Color:</label>
+        <input type="text" id="color" name="color" required>
+
+        <input type="submit" value="Submit">
+    </form>
+    
+    
+    <h1>Delete a Car</h1>
+    <form id="deleteForm" action="/api/cars" method="delete">
+        <label for="carIdToDelete">Enter Car ID to Delete:</label>
+        <input type="number" id="carIdToDelete" name="carIdToDelete" required>
+        <button id="deleteButton" type="button">Delete Car</button>
+    </form>
+    
+    <h1>Update a Car</h1>
+<form id="updateForm">
+    <label for="carIdToUpdate">Enter Car ID to Update:</label>
+    <input type="number" id="carIdToUpdate" name="carIdToUpdate" required>
+    <label for="updatedModel">Updated Model:</label>
+    <input type="text" id="updatedModel" name="updatedModel" required>
+    <label for="updatedPrice">Updated Price:</label>
+    <input type="number" id="updatedPrice" name="updatedPrice" required>
+    <label for="updatedColor">Updated Color:</label>
+    <input type="text" id="updatedColor" name="updatedColor" required>
+    <button id="updateButton" type="button">Update Car</button>
+</form>
+    
+    
+     <h1>All Cars Data</h1>
+    <table id="carTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Model</th>
+                <th>Price</th>
+                <th>Color</th>
+            </tr>
+        </thead>
+        <tbody>
+                    
+       </tbody>
+    </table>
+    
+    <!-- ... Same HTML code as before ... -->
+
+<script>
+  document.getElementById("carForm").addEventListener("submit", function (event) {
+    event.preventDefault();
+    let carId = document.getElementById("carId").value;
+    let model = document.getElementById("model").value;
+    let price = document.getElementById("price").value;
+    let color = document.getElementById("color").value;
+
+    if (!carId || !model || !price || !color) {
+      alert("Please fill all the fields.");
+      return;
+    }
+
+    let formData = {
+      carId: parseInt(carId),
+      model: model,
+      price: parseInt(price),
+      color: color,
+    };
+
+    let xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/cars", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.status === 200) {
+          alert("Car added successfully!");
+        } else {
+          alert("Failed to add car. Please try again later.");
+        }
+      }
+    };
+    xhr.send(JSON.stringify(formData));
+  });
+
+  document.getElementById("deleteButton").addEventListener("click", function (event) {
+    event.preventDefault();
+    let carIdToDelete = document.getElementById("carIdToDelete").value;
+
+    if (!carIdToDelete) {
+      alert("Please enter the Car ID to delete.");
+      return;
+    }
+
+    let xhr = new XMLHttpRequest();
+    xhr.open("DELETE", `/api/cars/${carIdToDelete}`, true);
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.status === 200) {
+          alert("Car deleted successfully!");
+        } else {
+          alert("Failed to delete the car. Car ID may not exist or there was an error.");
+        }
+      }
+    };
+    xhr.send();
+  });
+
+  function fetchCarData() {
+    let xhr = new XMLHttpRequest();
+    xhr.open("GET", "/api/cars", true);
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.status === 200) {
+          const data = JSON.parse(xhr.responseText);
+          const carTableBody = document.querySelector("#carTable tbody");
+          carTableBody.innerHTML = "";
+
+          data.forEach((car) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${car.carId}</td>
+              <td>${car.model}</td>
+              <td>${car.price}</td>
+              <td>${car.color}</td>
+            `;
+            carTableBody.appendChild(row);
+          });
+        } else {
+          alert("Failed to fetch car data. Please try again later.");
+        }
+      }
+    };
+    xhr.send();
+  }
+
+  // Fetch car data on page load
+  fetchCarData();
+</script>
+
+
+</body>
+</html>
